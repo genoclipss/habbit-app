@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <title>Habit Tracker</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#2f8f83">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap">
+    <style>
+        :root {
+            --bg: #f6f5f2;
+            --pn: #fff;
+            --ln: #e2dfd8;
+            --tx: #1f2328;
+            --mu: #6c7178;
+            --acc: #2f8f83;
+            --cell: #e9e7e1;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        @media(prefers-color-scheme:dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #17191c;
+                --pn: #202327;
+                --ln: #2f343a;
+                --tx: #e8e6e1;
+                --mu: #9aa0a6;
+                --acc: #5cc2b3;
+                --cell: #2b2f34
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #17191c;
+            --pn: #202327;
+            --ln: #2f343a;
+            --tx: #e8e6e1;
+            --mu: #9aa0a6;
+            --acc: #5cc2b3;
+            --cell: #2b2f34
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px)
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--tx);
+            font: 15px/1.4 Figtree, system-ui, sans-serif
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 16px
+        }
+
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0
+        }
+
+        .sub {
+            color: var(--mu);
+            font-size: 13px
+        }
+
+        .tabs,
+        .nav {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+
+        button {
+            font: inherit;
+            color: inherit;
+            background: var(--pn);
+            border: 1px solid var(--ln);
+            border-radius: 8px;
+            padding: 6px 12px;
+            cursor: pointer
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible {
+            outline: 2px solid var(--acc);
+            outline-offset: 2px
+        }
+
+        button.a {
+            background: var(--acc);
+            border-color: var(--acc);
+            color: #fff
+        }
+
+        .bar-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        .ttl {
+            font-weight: 600;
+            font-size: 17px
+        }
+
+        .card {
+            background: var(--pn);
+            border: 1px solid var(--ln);
+            border-radius: 12px;
+            padding: 12px
+        }
+
+        .tw {
+            overflow-x: auto;
+            max-width: 100%
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%
+        }
+
+        th,
+        td {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--ln);
+            white-space: nowrap;
+            text-align: left;
+            font-weight: 400
+        }
+
+        th {
+            color: var(--mu);
+            font-size: 13px
+        }
+
+        th.hb {
+            font-size: 18px;
+            text-align: center
+        }
+
+        td:nth-child(n+3) {
+            text-align: center
+        }
+
+        td.off {
+            color: var(--mu);
+            opacity: .4
+        }
+
+        tr.td td:first-child {
+            font-weight: 800;
+            color: var(--acc)
+        }
+
+        tfoot td {
+            color: var(--mu);
+            font-size: 13px;
+            border: 0
+        }
+
+        .ck {
+            width: 22px;
+            height: 22px;
+            padding: 0;
+            border-radius: 6px;
+            background: transparent;
+            vertical-align: middle
+        }
+
+        .ck.on {
+            background: var(--acc);
+            border-color: var(--acc)
+        }
+
+        .ck.on::after {
+            content: "✓";
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800
+        }
+
+        .bar {
+            display: inline-flex;
+            gap: 2px;
+            vertical-align: middle;
+            margin-right: 4px
+        }
+
+        .bar i {
+            width: 8px;
+            height: 13px;
+            border-radius: 2px;
+            background: var(--cell)
+        }
+
+        .bar i.f {
+            background: var(--acc)
+        }
+
+        input {
+            font: inherit;
+            color: inherit;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 4px 6px
+        }
+
+        input:hover,
+        input:focus {
+            border-color: var(--ln)
+        }
+
+        .nt {
+            width: 160px
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 14px;
+            margin-top: 12px;
+            color: var(--mu);
+            font-size: 13px
+        }
+
+        .heat {
+            display: grid;
+            grid-auto-flow: column;
+            grid-template-rows: repeat(7, 12px);
+            grid-auto-columns: 12px;
+            gap: 3px;
+            overflow-x: auto;
+            padding-bottom: 6px
+        }
+
+        .heat i {
+            border-radius: 3px;
+            background: color-mix(in srgb, var(--acc) calc(var(--l)*1%), var(--cell))
+        }
+
+        .heat i.e {
+            background: none
+        }
+
+        .heat i.fu {
+            opacity: .35
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 14px
+        }
+
+        .mc {
+            text-align: left;
+            padding: 14px
+        }
+
+        .mc b {
+            display: block;
+            font-size: 17px;
+            margin-bottom: 8px
+        }
+
+        .hr {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--ln);
+            flex-wrap: wrap
+        }
+
+        .hr .e {
+            width: 48px;
+            text-align: center;
+            font-size: 18px
+        }
+
+        .hr .n {
+            flex: 1;
+            min-width: 160px
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            box-sizing: border-box;
+            background: var(--bg);
+            color: var(--tx);
+            border: 1px solid var(--ln);
+            border-radius: 8px;
+            padding: 8px;
+            font: 12px monospace
+        }
+
+        #auth {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9;
+            padding: 16px
+        }
+
+        #auth[hidden],
+        #lo[hidden] {
+            display: none
+        }
+
+        #auth .card {
+            width: 100%;
+            max-width: 340px;
+            display: grid;
+            gap: 8px
+        }
+
+        #auth input {
+            border-color: var(--ln)
+        }
+
+        h3 {
+            margin: 18px 0 6px;
+            font-size: 15px
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+</head>
+
+<body>
+    <div id="auth" hidden>
+        <div class="card">
+            <div class="ttl">Masuk ke Habit Tracker</div><input id="ae" type="email" placeholder="Email"
+                autocomplete="email"><input id="ap" type="password" placeholder="Password"
+                autocomplete="current-password"><button class="a" id="ain">Masuk</button><button id="aup">Daftar akun
+                baru</button>
+            <div class="sub" id="am"></div>
+        </div>
+    </div>
+    <main>
+        <header>
+            <div>
+                <h1>Habit Tracker</h1>
+                <div class="sub" id="today"></div>
+                <div class="sub" id="st">lokal saja</div><button id="lo" hidden>Keluar</button>
+            </div>
+            <div class="tabs" id="tabs"></div>
+        </header>
+        <div id="app"></div>
+    </main>
+    <script>
+        const K = 'habit-tracker-v1', P = n => String(n).padStart(2, '0'), iso = d => d.getFullYear() + '-' + P(d.getMonth() + 1) + '-' + P(d.getDate());
+        const TD = iso(new Date()), E = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])), fmt = (d, o) => d.toLocaleDateString('id-ID', o);
+        const DEF = [['😴', 'Sleep 7-8 hours'], ['🥗', 'Eat healthy meals'], ['📱', 'Social media ≤ 90min'], ['🚫', 'No porn/alcohol'], ['💧', 'Drink 2L water'], ['💻', 'Study ≥ 2 hours'], ['🏋️', 'Exercise 30 minutes'], ['📖', 'Read 30 minutes'], ['✍️', 'Journal & self-reflect'], ['📋', "Plan tomorrow's tasks"]].map((x, i) => ({ id: 'h' + i, emoji: x[0], name: x[1], start: '2000-01-01' }));
+        let S = { habits: DEF, log: {}, notes: {} };
+        try { const r = localStorage.getItem(K); if (r) S = JSON.parse(r) } catch (e) { }
+        const SB_URL = 'https://mscetcmrlernkjbkixcs.supabase.co.', SB_KEY = 'sb_publishable_HyCLIOEmZrgB_8OjMC3ESQ_2CyRpwFR';
+        let sb = null, UID = null, synced = false, tm = null; const dirty = new Set();
+        const setSt = t => { const e = document.getElementById('st'); if (e) e.textContent = t };
+        const pre = (o, y) => Object.fromEntries(Object.entries(o).filter(x => x[0].startsWith(y)));
+        const local = () => { try { localStorage.setItem(K, JSON.stringify(S)) } catch (e) { } };
+        function save(k) { local(); if (!UID) return; dirty.add(k); setSt('menyimpan…'); clearTimeout(tm); tm = setTimeout(flush, 700) }
+        async function flush() {
+            const ks = [...dirty]; dirty.clear(); try {
+                const all = ks.includes('all'), rows = [];
+                const ys = new Set(all ? [...Object.keys(S.log), ...Object.keys(S.notes)].map(k => k.slice(0, 4)) : ks.filter(k => k != 'h'));
+                if (all || ks.includes('h')) rows.push({ user_id: UID, key: 'meta', value: { habits: S.habits } });
+                ys.forEach(y => { if (/^\d{4}$/.test(y)) rows.push({ user_id: UID, key: 'y' + y, value: { log: pre(S.log, y), notes: pre(S.notes, y) } }) });
+                if (rows.length) { const r = await sb.from('habit_data').upsert(rows); if (r.error) throw r.error }
+                setSt('☁ tersinkron')
+            } catch (e) { ks.forEach(k => dirty.add(k)); setSt('offline, mencoba lagi'); tm = setTimeout(flush, 5000) }
+        }
+        function apply(rows) {
+            const first = !synced; synced = true;
+            if (first && !rows.some(r => r.key == 'meta')) { save('all'); return }
+            if (dirty.size) return;
+            for (const r of rows) {
+                const v = r.value || {};
+                if (r.key == 'meta' && Array.isArray(v.habits)) S.habits = v.habits;
+                else if (/^y\d{4}$/.test(r.key)) { const y = r.key.slice(1); for (const o of [S.log, S.notes]) for (const k of Object.keys(o)) if (k.startsWith(y)) delete o[k]; Object.assign(S.log, v.log || {}); Object.assign(S.notes, v.notes || {}) }
+            }
+            local(); setSt('☁ tersinkron'); const a = document.activeElement;
+            if (!(a && a.tagName == 'INPUT' && a.closest('#app'))) render()
+        }
+        async function pull() { try { const r = await sb.from('habit_data').select('key,value'); if (r.error) throw r.error; apply(r.data) } catch (e) { setSt('offline, data lokal') } }
+        function begin(id) { UID = id; document.getElementById('auth').hidden = true; document.getElementById('lo').hidden = false; setSt('menyambung…'); pull() }
+        (async () => {
+            try {
+                if (!window.supabase || SB_URL.startsWith('PASTE')) return setSt('lokal saja (belum dikonfigurasi)');
+                sb = supabase.createClient(SB_URL, SB_KEY);
+                const g = await sb.auth.getSession();
+                if (g.data.session) begin(g.data.session.user.id); else document.getElementById('auth').hidden = false;
+                const go = async up => {
+                    const m = document.getElementById('am'), c = { email: document.getElementById('ae').value.trim(), password: document.getElementById('ap').value }; m.textContent = '…';
+                    const r = up ? await sb.auth.signUp(c) : await sb.auth.signInWithPassword(c);
+                    if (r.error) m.textContent = r.error.message; else if (r.data.session) begin(r.data.user.id); else m.textContent = 'Cek email untuk konfirmasi, lalu masuk.'
+                };
+                document.getElementById('ain').onclick = () => go(false); document.getElementById('aup').onclick = () => go(true);
+                document.getElementById('lo').onclick = async () => { await sb.auth.signOut(); location.reload() };
+                document.addEventListener('visibilitychange', () => { if (!document.hidden && UID && !dirty.size) pull() });
+            } catch (e) { setSt('lokal saja') }
+        })();
+        let V = 'week', C = new Date();
+        const act = (h, k) => k >= h.start && (!h.end || k < h.end), done = (k, id) => (S.log[k] || []).includes(id);
+        const pct = k => { const a = S.habits.filter(h => act(h, k)); return a.length ? Math.round(100 * a.filter(h => done(k, h.id)).length / a.length) : 0 };
+        const bar = p => '<span class="bar">' + Array.from({ length: 10 }, (_, i) => `<i class="${i < Math.round(p / 10) ? 'f' : ''}"></i>`).join('') + '</span>' + p + '%';
+        const streak = id => { let d = new Date(), n = 0; if (!done(iso(d), id)) d.setDate(d.getDate() - 1); while (done(iso(d), id)) { n++; d.setDate(d.getDate() - 1) } return n };
+        const live = () => S.habits.filter(h => !h.end || h.end > TD);
+        function table(days) {
+            const f = iso(days[0]), l = iso(days[days.length - 1]), hs = S.habits.filter(h => h.start <= l && (!h.end || h.end > f));
+            let h = '<div class="card tw"><table><thead><tr><th>Tanggal<th>Progres' + hs.map(x => `<th class="hb" title="${E(x.name)}">${E(x.emoji)}`).join('') + '<th>Catatan</tr></thead><tbody>';
+            for (const d of days) { const k = iso(d); h += `<tr class="${k == TD ? 'td' : ''}"><td>${fmt(d, { weekday: 'short', day: 'numeric', month: 'short' })}<td>${bar(pct(k))}` + hs.map(x => act(x, k) ? `<td><button class="ck ${done(k, x.id) ? 'on' : ''}" data-d="${k}" data-h="${x.id}" aria-label="${E(x.name)}"></button>` : '<td class="off">·').join('') + `<td><input class="nt" data-n="${k}" value="${E(S.notes[k] || '')}" placeholder="catatan"></tr>` }
+            h += '</tbody><tfoot><tr><td>Rata-rata<td>' + hs.map(x => { const ds = days.map(iso).filter(k => k <= TD && act(x, k)); return '<td>' + (ds.length ? Math.round(100 * ds.filter(k => done(k, x.id)).length / ds.length) + '%' : '–') }).join('') + '<td></tr></tfoot></table></div>';
+            return h + '<div class="chips">' + hs.map(x => `<span>${E(x.emoji)} ${E(x.name)}</span>`).join('') + '</div>'
+        }
+        function year(y) {
+            const j = new Date(y, 0, 1), n = Math.round((new Date(y + 1, 0, 1) - j) / 864e5);
+            let hm = '<div class="card"><div class="heat">' + '<i class="e"></i>'.repeat(j.getDay());
+            for (let i = 0; i < n; i++) { const k = iso(new Date(y, 0, 1 + i)), p = pct(k); hm += `<i title="${k}: ${p}%" style="--l:${k > TD ? 0 : p}" class="${k > TD ? 'fu' : ''}"></i>` }
+            hm += '</div></div><div class="grid">';
+            for (let m = 0; m < 12; m++) {
+                const dm = new Date(y, m + 1, 0).getDate(), ks = Array.from({ length: dm }, (_, i) => iso(new Date(y, m, i + 1))).filter(k => k <= TD);
+                const a = ks.length ? Math.round(ks.reduce((s, k) => s + pct(k), 0) / ks.length) : null;
+                hm += `<button class="card mc" data-m="${m}"><b>${fmt(new Date(y, m, 1), { month: 'long' })}</b>${a === null ? '<span class="sub">belum mulai</span>' : bar(a)}</button>`
+            }
+            return hm + '</div>'
+        }
+        function habits() {
+            let h = '<div class="card"><div class="ttl">Kelola habit</div><div class="sub">Tambah atau arsipkan kapan saja. Progres dihitung otomatis; riwayat lama tidak berubah.</div>';
+            for (const x of live()) h += `<div class="hr"><input class="e" data-e="${x.id}" value="${E(x.emoji)}" aria-label="Emoji"><input class="n" data-nm="${x.id}" value="${E(x.name)}" aria-label="Nama"><span class="sub">streak ${streak(x.id)} hari</span><button data-x="${x.id}">Arsipkan</button></div>`;
+            h += '<div class="hr"><input class="e" id="ne" placeholder="⭐"><input class="n" id="nn" placeholder="Habit baru, mis. Meditasi 10 menit"><button class="a" data-add="1">Tambah</button></div></div>';
+            return h + '<h3>Cadangan data</h3><div class="card"><div class="sub">Data tersimpan di browser ini. Salin teks ini untuk cadangan; tempel lalu tekan Muat untuk memulihkan.</div><textarea id="bk">' + E(JSON.stringify(S)) + '</textarea><div class="nav" style="margin-top:8px"><button data-imp="1">Muat</button><span class="sub" id="msg"></span></div></div>'
+        }
+        function render() {
+            const y = C.getFullYear(), m = C.getMonth(); let t = '', b = '', nav = true;
+            if (V == 'week') { const s = new Date(C); s.setDate(s.getDate() - s.getDay()); const ds = Array.from({ length: 7 }, (_, i) => { const d = new Date(s); d.setDate(s.getDate() + i); return d }); t = fmt(ds[0], { day: 'numeric', month: 'short' }) + ' – ' + fmt(ds[6], { day: 'numeric', month: 'short', year: 'numeric' }); b = table(ds) }
+            else if (V == 'month') { const n = new Date(y, m + 1, 0).getDate(); t = fmt(C, { month: 'long', year: 'numeric' }); b = table(Array.from({ length: n }, (_, i) => new Date(y, m, i + 1))) }
+            else if (V == 'year') { t = y; b = year(y) } else { nav = false; b = habits() }
+            $('#today').innerHTML = 'Hari ini ' + bar(pct(TD));
+            $('#tabs').innerHTML = [['week', 'Minggu'], ['month', 'Bulan'], ['year', 'Tahun'], ['habits', 'Habit']].map(x => `<button class="${V == x[0] ? 'a' : ''}" data-v="${x[0]}">${x[1]}</button>`).join('');
+            $('#app').innerHTML = (nav ? `<div class="bar-row"><div class="ttl">${t}</div><div class="nav"><button data-s="-1" aria-label="Sebelumnya">‹</button><button data-s="0">Hari ini</button><button data-s="1" aria-label="Berikutnya">›</button></div></div>` : '') + b
+        }
+        const $ = s => document.querySelector(s);
+        function shift(n) { if (n == 0) { C = new Date(); return } if (V == 'week') C.setDate(C.getDate() + 7 * n); else if (V == 'month') { C = new Date(C.getFullYear(), C.getMonth() + n, 1) } else C = new Date(C.getFullYear() + n, 0, 1) }
+        $('#app').addEventListener('click', e => {
+            const t = e.target.closest('button'); if (!t) return; const d = t.dataset;
+            if (d.d) { const l = S.log[d.d] || (S.log[d.d] = []), i = l.indexOf(d.h); i < 0 ? l.push(d.h) : l.splice(i, 1); save(d.d.slice(0, 4)) }
+            else if (d.s !== undefined) shift(+d.s);
+            else if (d.m !== undefined) { V = 'month'; C = new Date(C.getFullYear(), +d.m, 1) }
+            else if (d.x) { S.habits.find(h => h.id == d.x).end = TD; save('h') }
+            else if (d.add) { const n = $('#nn').value.trim(); if (!n) return; S.habits.push({ id: 'h' + Date.now(), emoji: $('#ne').value.trim() || '⭐', name: n, start: TD }); save('h') }
+            else if (d.imp) { try { const o = JSON.parse($('#bk').value); if (!Array.isArray(o.habits)) throw 0; S = { habits: o.habits, log: o.log || {}, notes: o.notes || {} }; save('all') } catch (x) { $('#msg').textContent = 'Format tidak valid'; return } }
+            else return; render()
+        });
+        $('#app').addEventListener('change', e => {
+            const d = e.target.dataset, v = e.target.value;
+            if (d.n !== undefined) { S.notes[d.n] = v; save(d.n.slice(0, 4)) } else if (d.nm) { S.habits.find(h => h.id == d.nm).name = v; save('h') } else if (d.e) { S.habits.find(h => h.id == d.e).emoji = v; save('h') }
+        });
+        $('#tabs').addEventListener('click', e => { const t = e.target.closest('button'); if (t) { V = t.dataset.v; render() } });
+        render();
+        if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => { });
+    </script>
+</body>
+
+</html>
